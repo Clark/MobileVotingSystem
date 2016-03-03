@@ -1,4 +1,6 @@
-MobileVotingSystem
+Mobile Voting System
+Milestone 2
+Professor Shi-Kuo Chang - CS1631
 
 Should be fully functional.
 
