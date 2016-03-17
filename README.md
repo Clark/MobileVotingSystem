@@ -21,8 +21,3 @@ User Commands:
 
 Text message acknowledgements are sent with each transaction.
 In addition, a display log is provided on the application.
-
-TODO:
-  Disable voting after end message is sent
-  Should be some command to prevent additional participants from being added?
-  Visual uphaul of application (at least a Pitt icon in the corner?)
