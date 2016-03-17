@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     int[] votes;
 
     TextView logs;
+    boolean valid = true;
 
 
     public static MainActivity instance() {
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         //getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         logs = (TextView) findViewById(R.id.logs);
+        logs.setTextColor(0xFF192857);
         currentLogs = logs.getText().toString();
     }
 
@@ -57,18 +59,22 @@ public class MainActivity extends AppCompatActivity {
             createVotingComponent(sender);
             return;
         }
-        logs.setText(currentLogs);
+        //logs.setText(currentLogs);
         // Admin Functions
+        /////// Uncomment if you want the admin to be unable to vote
         //if(sender.equals(admin)) {
             //String[] bodySplit = body.split(getString(R.string.space));
-            if(body.toLowerCase().equals("start")) initializeTallyTable(sender);
-            else if(body.toLowerCase().equals("end")) endVoting(sender);
-            else if(body.split(getString(R.string.space))[0].toLowerCase().equals("add")) addParticipants(sender, body);
-        //} else {
-            // Voters
-            else {
-            handleVote(sender, body);
-        }
+            if(valid) {
+                if (body.toLowerCase().equals("start")) initializeTallyTable(sender);
+                else if (body.toLowerCase().equals("end")) endVoting(sender);
+                else if (body.split(getString(R.string.space))[0].toLowerCase().equals("add"))
+                    addParticipants(sender, body);
+                    //} else {
+                    // Voters
+                else {
+                    handleVote(sender, body);
+                }
+            }
     }
 
     private void acknowledge(String Receiver, String ack) {
@@ -102,28 +108,29 @@ public class MainActivity extends AppCompatActivity {
                 winners = winners + "  " + adjusted;
             }
         }
-        winners = "\nThe winners are: " + winners + " with " + max + " votes!";
+        winners = "\nThe winners are:\n\t\t" + winners + " with " + max + " votes!";
         currentLogs = currentLogs + winners;
         logs.setText(currentLogs);
         acknowledge(sender, winners);
-
-
+        valid = false;
     }
 
     private void addParticipants(String sender, String body) {
         // Participants will be given in a single string, separated by commas
         body = body.substring(4);
         String[] newParticipants = body.split(",");
-
+        String retVal = "Participants added. \nTheir numbers are ";
         // If the participant does not already exist, enter it into the list
         for(int i = 0; i < newParticipants.length; i++) {
             if(!participants.contains(newParticipants[i])) {
                 participants.add(newParticipants[i]);
                 currentLogs = currentLogs + "\n" + newParticipants[i] + " was added with the participant number of " + participants.size();
                 logs.setText(currentLogs);
+                retVal = " " + retVal + participants.size() + ",";
             }
         }
-        acknowledge(sender, "All participants successfully added.");
+        retVal = retVal + " respectfully.";
+        acknowledge(sender, retVal);
     }
 
     private void handleVote(String sender, String body) {
@@ -132,23 +139,22 @@ public class MainActivity extends AppCompatActivity {
             // Return only one arg should be taken
         //} else {
             // If the participant exists
-            //if(participants.size() < Integer.parseInt(body)) {
             if(Integer.parseInt(body) <= participants.size() && Integer.parseInt(body) > 0) {
                 if(tallyTable.containsKey(sender)) {
                     // Handle user has already voted
                     currentLogs = currentLogs + "\n " + sender + " has already voted. Vote ineffective.";
                     logs.setText(currentLogs);
-                    acknowledge(sender, "You have already voted.");
+                    acknowledge(sender, "Sorry, you have already voted for " + participants.get(Integer.parseInt(tallyTable.get(sender)) - 1));
                 } else {
                     tallyTable.put(sender, body);
-                    currentLogs = currentLogs + "\n " + sender + " has voted for " + body;
+                    currentLogs = currentLogs + "\n " + sender + " has voted for " + participants.get(Integer.parseInt(tallyTable.get(sender)) - 1) + "(" + body + ")";
                     logs.setText(currentLogs);
-                    acknowledge(sender, "Vote successful.");
+                    acknowledge(sender, "You have successfully voted for " + participants.get(Integer.parseInt(body) - 1));
                 }
             } else {
-                currentLogs = currentLogs + "\n This participant does not exist.";
+                currentLogs = currentLogs + "\n Participant" + body + "does not exist.";
                 logs.setText(currentLogs);
-                acknowledge(sender, "This participant does not exist");
+                acknowledge(sender, "Sorry, participant " + body +" does not exist");
             }
         //}
 
